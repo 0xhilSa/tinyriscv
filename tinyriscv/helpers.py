@@ -16,3 +16,7 @@ def homogenize(buf:list, dtype=None):
     buf = [float(x) for x in buf]
   else: raise TypeError(f"Unsupported element types in buf: {set(type(x) for x in buf)}")
   return buf, target_dtype
+
+def sign_extend(value, bits):
+  sign_bit = 1 << (bits - 1)
+  return (value & (sign_bit - 1)) - (value & sign_bit)
