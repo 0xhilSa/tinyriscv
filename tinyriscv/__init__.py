@@ -11,37 +11,34 @@ class RISCV:
     self.__lines = []
   def ipc(self): self.pc += 4
   def add(self, rd:int, rs1:int, rs2:int):
-    self.regs[rd] = self.regs[rs1] + self.regs[rs2] # type: ignore
+    self.regs[rd] = int(self.regs[rs1]) + int(self.regs[rs2]) # type: ignore
     self.__lines.append(f"add x{rd}, x{rs1}, x{rs1}")
     self.ipc()
   def addi(self, rd:int, rs1:int, imm:int):
-    self.regs[rd] = self.regs[rs1] + imm # type: ignore
+    self.regs[rd] = int(self.regs[rs1]) + imm # type: ignore
     self.__lines.append(f"add x{rd}, x{rs1}, {imm}")
     self.ipc()
   def sub(self, rd:int, rs1:int, rs2:int):
-    self.regs[rd] = self.regs[rs1] - self.regs[rs2] # type: ignore
+    self.regs[rd] = int(self.regs[rs1]) - int(self.regs[rs2]) # type: ignore
     self.__lines.append(f"sub x{rd}, x{rs1}, x{rs2}")
     self.ipc()
   def mul(self, rd:int, rs1:int, rs2:int):
-    self.regs[rd] = self.regs[rs1] * self.regs[rs2] # type: ignore
+    self.regs[rd] = int(self.regs[rs1]) * int(self.regs[rs2]) # type: ignore
     self.__lines.append(f"muli x{rd}, x{rs1}, x{rs1}")
     self.ipc()
   def muli(self, rd:int, rs1:int, imm:int):
-    self.regs[rd] = self.regs[rs1] * imm # type: ignore
+    self.regs[rd] = int(self.regs[rs1]) * imm # type: ignore
     self.__lines.append(f"muli x{rd}, x{rs1}, {imm}")
     self.ipc()
   def xor(self, rd:int, rs1:int, rs2:int):
-    self.regs[rd] = self.regs[rs1] ^ self.regs[rs2] # type: ignore
+    self.regs[rd] = int(self.regs[rs1]) ^ int(self.regs[rs2]) # type: ignore
     self.__lines.append(f"xor x{rd}, x{rs1}, x{rs2}")
     self.ipc()
-  def sign_extend(self, value, bits):
-    sign_bit = 1 << (bits - 1)
-    return (value & (sign_bit - 1)) - (value & sign_bit)
   def regmap(self):
     txt = ""
     for index, value in enumerate(self.regs):
-      if index == len(self.regs)-1: txt += f"x{index} = {value}"
-      else: txt += f"x{index} = {value}\n"
+      if index == len(self.regs)-1: txt += f"x{index} = {hex(value)}"
+      else: txt += f"x{index} = {hex(value)}\n"
     return txt
   def asm(self, output:bool=False):
     txt = ""
@@ -49,3 +46,6 @@ class RISCV:
     if output:
       with open("a.asm", "a") as file: file.write(txt)
     return txt
+  def clean(self):
+    for index in range(1,len(self.regs)): self.regs[index] = 0
+    self.pc = 0
