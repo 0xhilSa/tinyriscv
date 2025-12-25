@@ -2,9 +2,12 @@ from tinyriscv import RISCV
 
 riscv = RISCV()
 # riscv.regs[0] = 12 # this will cause the error
-riscv.addi(1, 2, -1) # -> 0 + (-1)
-riscv.addi(2, 3, 2)  # -> 0 + 2
-riscv.add(3, 1, 2)   # -> -1 + 2
-riscv.mul(4, 2, 3)   # -> 2 * 1
-print(riscv.regmap())
+riscv.addi(1, 2, 10)
+riscv.addi(2, 3, 2)
+riscv.sll(3, 1, 2)
+riscv.srl(4, 3, 2)
+riscv.slli(5, 4, 1)
+riscv.srai(6, 5, 1)
+riscv.xor(2, 3, 2)
+riscv.dump(view=True)
 #print(riscv.asm(output=True))
