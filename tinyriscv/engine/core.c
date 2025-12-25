@@ -150,11 +150,63 @@ static PyObject *__getitem__(PyObject *self, PyObject *args){
   return PyLong_FromLong((long)item);
 }
 
+static PyObject *__setitem__(PyObject *self, PyObject *args){
+  PyObject *pycapsule;
+  long index, value;
+  const char *fmt;
+  if(!PyArg_ParseTuple(args, "Onls", &pycapsule, &index, &value, &fmt)) return NULL;
+  void *buf = PyCapsule_GetPointer(pycapsule, "array");
+  if(!buf) return NULL;
+  size_t size = getsize(fmt);
+  if(size == 0){
+    PyErr_Format(PyExc_ValueError, "Invalid DType: %s", fmt);
+    return NULL;
+  }
+  void *dest = (char *)buf + index * size;
+  switch(*fmt){
+    case 'b': {
+      char v = (char)value;
+      memcpy(dest, &v, size);
+      break;
+    }
+    case 'B': {
+      unsigned char v = (unsigned char)value;
+      memcpy(dest, &v, size);
+      break;
+    }
+    case 'h': {
+      short v = (short)value;
+      memcpy(dest, &v, size);
+      break;
+    }
+    case 'H': {
+      unsigned short v = (unsigned short)value;
+      memcpy(dest, &v, size);
+      break;
+    }
+    case 'i': {
+      int v = (int)value;
+      memcpy(dest, &v, size);
+      break;
+    }
+    case 'I': {
+      unsigned int v = (unsigned int)value;
+      memcpy(dest, &v, size);
+      break;
+    }
+    default:
+      PyErr_Format(PyExc_ValueError, "Invalid DType: %s", fmt);
+      return NULL;
+  }
+  Py_RETURN_NONE;
+}
+
 static PyMethodDef methods[] = {
   {"array", array, METH_VARARGS, "Create a C-allocated array from a Python list"},
   {"tolist", tolist, METH_VARARGS, "Convert a C array capsule back into a Python list"},
   {"sizeof", __sizeof__, METH_VARARGS, "Get the array size"},
   {"getitem", __getitem__, METH_VARARGS, "GetItem via index"},
+  {"setitem", __setitem__, METH_VARARGS, "SetItem via index"},
   {NULL, NULL, 0, NULL}
 };
 
