@@ -9,7 +9,7 @@ trying to implement the tiny riscv core in python
     - [ ] Node having register, address, and value(hex)
     - [ ] Edge indicating which op will be performed
 
-### Installation from the Sauce
+### Install from the source
 ```bash
 git clone https://github.com/0xhilSa/tinyriscv ~/tinyriscv
 cd tinyriscv
