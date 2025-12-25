@@ -9,6 +9,6 @@ class RegFile:
   def __setitem__(self, index, value):
     if index == 0: raise ValueError(f"can't set the value of register x0(zero)")
     if not 1 <= index < len(self.x): raise ValueError(f"invalid register call: {index}")
-    self.x[index] = value & 0xffffffff
+    self.x[index] = value & 0xfff
   def __iter__(self): return iter(self.x)
   def __len__(self): return len(self.x)
