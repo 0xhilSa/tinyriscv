@@ -9,7 +9,9 @@ class array:
     self.length = len(array1D)
     del buf
   def __repr__(self): return f"<Array(length={self.length}, dtype='{self.dtype.ctype}')>"
-  def lst(self): return core.tolist(self.buf, self.length, self.dtype.fmt)
+  def lst(self):
+    lst = core.tolist(self.buf, self.length, self.dtype.fmt)
+    return [hex(i) for i in lst]
   @staticmethod
   def zeros(length:int, dtype:dtypes.DType=dtypes.int32): return array([0] * length, dtype)
   @staticmethod
@@ -19,3 +21,6 @@ class array:
     if isinstance(index, int):
       if 0 <= index < self.length: raise
       return core.getitem(self.buf, index)
+  def __setitem__(self, index, value):
+    if core.getitem(self.buf, index) == 0: core.setitem(self.buf, index, value, self.dtype.fmt)
+    raise RuntimeError(f"")
