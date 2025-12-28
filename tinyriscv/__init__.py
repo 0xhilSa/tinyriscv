@@ -35,6 +35,30 @@ class RISCV:
     self.__inst.append(inst)
     self.__lines.append(f"mul x{rd}, x{rs1}, x{rs1}")
     self.ipc()
+  def and_(self, rd:int, rs1:int, rs2:int):
+    self.regs[rd] = int(self.regs[rs1]) & int(self.regs[rs2]) # type: ignore
+    inst = self.__encode_r(0x00, rs2, rs1, 0x7, rd).to_bytes(4, byteorder="big").hex()
+    self.__inst.append(inst)
+    self.__lines.append(f"and x{rd}, x{rs1}, x{rs2}")
+    self.ipc()
+  def andi(self, rd:int, rs1:int, imm:int):
+    self.regs[rd] = int(self.regs[rs1]) & imm # type: ignore
+    inst = self.__encode_i(imm, rs1, 0x7, rd).to_bytes(4, byteorder="big").hex()
+    self.__inst.append(inst)
+    self.__lines.append(inst)
+    self.ipc()
+  def or_(self, rd:int, rs1:int, rs2:int):
+    self.regs[rd] = int(self.regs[rs1]) | int(self.regs[rs2]) # type: ignore
+    inst = self.__encode_r(0x00, rs2, rs1, 0x6, rd).to_bytes(4, byteorder="big").hex()
+    self.__inst.append(inst)
+    self.__lines.append(f"or x{rd}, x{rs1}, x{rs2}")
+    self.ipc()
+  def ori(self, rd:int, rs1:int, imm:int):
+    self.regs[rd] = int(self.regs[rs1]) | imm # type: ignore
+    inst = self.__encode_i(imm, rs1, 0x6, rd).to_bytes(4, byteorder="big").hex()
+    self.__inst.append(inst)
+    self.__lines.append(f"ori x{rd}, x{rs1}, {imm}")
+    self.ipc()
   def xor(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) ^ int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x00, rs2, rs1, 0x4, rd).to_bytes(4, byteorder="big").hex()
