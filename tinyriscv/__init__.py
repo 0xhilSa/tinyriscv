@@ -163,24 +163,17 @@ class RISCV:
   def dump(self, filename:str="a", format="hex", view:bool=False):
     if format not in ["bin", "oct", "hex"]: raise ValueError(f"invalid file format '{format}', expected from 'bin', 'oct', or 'hex'")
     with open(f"{filename}.{format}", "w") as file:
-      if format == "hex":
-        for inst in self.__inst: file.write(f"{inst}\n")
-      elif format == "oct":
-        for inst in self.__inst: file.write(f"{oct(int(inst,16))}\n"[2:])
-      else:
-        for inst in self.__inst: file.write(f"{bin(int(inst,16))}\n"[2:])
+      for inst in self.__inst:
+         val = int(inst, 16)
+         if format == "hex": file.write(f"{val:08X}\n")
+         elif format == "oct": file.write(f"{val:011o}\n")
+         else: file.write(f"{val:032b}\n")
     if view:
       txt = ""
-      if format == "hex":
-        for index, inst in enumerate(self.__inst):
-          if index == len(self.__inst)-1: txt += inst
-          else: txt += f"{inst}\n"
-      elif format == "bin":
-        for index, inst in enumerate(self.__inst):
-          if index == len(self.__inst)-1: txt +=f"{bin(int(inst,16))}"[2:]
-          else: txt += f"{bin(int(inst,16))}"[2:]+"\n"
-      elif format == "oct":
-        for index, inst in enumerate(self.__inst):
-          if index == len(self.__inst)-1: txt += f"{oct(int(inst,16))}"[2:]
-          else: txt += f"{oct(int(inst,16))}"[2:]+"\n"
+      for i, inst in enumerate(self.__inst):
+        val = int(inst, 16)
+        if format == "hex": s = f"{val:08X}"
+        elif format == "oct": s = f"{val:011o}"
+        else: s = f"{val:032b}"
+        txt += s if i == len(self.__inst) - 1 else s + "\n"
       print(txt)
