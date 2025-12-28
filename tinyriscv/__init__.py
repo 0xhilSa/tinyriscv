@@ -1,11 +1,10 @@
 from tinyriscv import dtypes
 from tinyriscv.array import array
 from tinyriscv.regs import RegFile
-import os
 
 class RISCV:
   def __init__(self, memory:int=1024): # memory size of 1MB
-    self.memory = array.zeros(memory, dtypes.uint8)
+    self.memory = array.zeros(memory, dtypes.uint32)
     self.regs = RegFile()
     self.pc = 0
     self.halted = False # for sim
@@ -115,18 +114,18 @@ class RISCV:
     self.pc = 0
   def __encode_r(self, funct7, rs2, rs1, funct3, rd, opcode=0x33):
     inst = ((funct7 & 0x7f) << 25) | \
-           ((rs2   & 0x1f) << 20) | \
-           ((rs1   & 0x1f) << 15) | \
+           ((rs2 & 0x1f) << 20) | \
+           ((rs1 & 0x1f) << 15) | \
            ((funct3 & 0x07) << 12) | \
-           ((rd    & 0x1f) << 7)  | \
+           ((rd & 0x1f) << 7)  | \
            (opcode & 0x7f)
     return inst
   def __encode_i(self, imm:int, rs1:int, funct3:int, rd:int, opcode:int=0x13):
     imm &= 0xfff
-    inst = ((imm   & 0xfff) << 20) | \
-           ((rs1   & 0x1f)  << 15) | \
+    inst = ((imm & 0xfff) << 20) | \
+           ((rs1 & 0x1f)  << 15) | \
            ((funct3 & 0x07) << 12) | \
-           ((rd    & 0x1f)  << 7)  | \
+           ((rd & 0x1f)  << 7)  | \
            (opcode & 0x7f)
     return inst
   def __encode_i_shift(self, funct7, shamt, rs1, funct3, rd, opcode=0x13):
@@ -138,11 +137,26 @@ class RISCV:
         (opcode & 0x7f)
     return inst
   def dump(self, filename:str="a", format="hex", view:bool=False):
+    if format not in ["bin", "oct", "hex"]: raise ValueError(f"invalid file format '{format}', expected from 'bin', 'oct', or 'hex'")
     with open(f"{filename}.{format}", "w") as file:
-      for inst in self.__inst: file.write(f"{inst}\n")
+      if format == "hex":
+        for inst in self.__inst: file.write(f"{inst}\n")
+      elif format == "oct":
+        for inst in self.__inst: file.write(f"{oct(int(inst,16))}\n"[2:])
+      else:
+        for inst in self.__inst: file.write(f"{bin(int(inst,16))}\n"[2:])
     if view:
       txt = ""
-      for index, inst in enumerate(self.__inst):
-        if index == len(self.__inst)-1: txt += inst
-        else: txt += f"{inst}\n"
+      if format == "hex":
+        for index, inst in enumerate(self.__inst):
+          if index == len(self.__inst)-1: txt += inst
+          else: txt += f"{inst}\n"
+      elif format == "bin":
+        for index, inst in enumerate(self.__inst):
+          if index == len(self.__inst)-1: txt +=f"{bin(int(inst,16))}"[2:]
+          else: txt += f"{bin(int(inst,16))}"[2:]+"\n"
+      elif format == "oct":
+        for index, inst in enumerate(self.__inst):
+          if index == len(self.__inst)-1: txt += f"{oct(int(inst,16))}"[2:]
+          else: txt += f"{oct(int(inst,16))}"[2:]+"\n"
       print(txt)
