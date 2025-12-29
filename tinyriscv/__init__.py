@@ -143,20 +143,18 @@ class RISCV:
       if index == len(self.regs)-1: txt += f"x{index} = {hex(value)}"
       else: txt += f"x{index} = {hex(value)}\n"
     return txt
-  def asm(self, filename:str="a.asm", write:bool=True, show_addr:bool=True):
+  def asm(self, filename:str="a.asm", show_addr:bool=True):
     lines = []
     pc = 0
     lines.append("  .section .text")
     lines.append("  .globl _start")
     lines.append("_start:")
     for asm_line, hexinst in zip(self.__lines, self.__inst):
-      if show_addr: lines.append(f"    {asm_line:<25} # 0x{pc:08X} : {hexinst}")
-      else: lines.append(f"    {asm_line}")
+      if show_addr: lines.append(f"  {asm_line:<25} # 0x{pc:08X} : {hexinst}")
+      else: lines.append(f"  {asm_line}")
       pc += 4
     txt = "\n".join(lines) + "\n"
-    if write:
-      with open(filename, "w") as f: f.write(txt)
-    return txt
+    with open(filename, "w") as f: f.write(txt)
   def clean(self):
     for index in range(1,len(self.regs)): self.regs[index] = 0
     self.pc = 0
