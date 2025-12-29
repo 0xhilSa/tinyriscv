@@ -130,8 +130,8 @@ class RISCV:
   def asm(self, filename:str="a.asm", write:bool=True, show_addr:bool=True):
     lines = []
     pc = 0
-    lines.append("    .section .text")
-    lines.append("    .globl _start")
+    lines.append("  .section .text")
+    lines.append("  .globl _start")
     lines.append("_start:")
     for asm_line, hexinst in zip(self.__lines, self.__inst):
       if show_addr: lines.append(f"    {asm_line:<25} # 0x{pc:08X} : {hexinst}")
@@ -155,9 +155,9 @@ class RISCV:
   def __encode_i(self, imm:int, rs1:int, funct3:int, rd:int, opcode:int=0x13):
     imm &= 0xfff
     inst = ((imm & 0xfff) << 20) | \
-           ((rs1 & 0x1f)  << 15) | \
+           ((rs1 & 0x1f) << 15) | \
            ((funct3 & 0x07) << 12) | \
-           ((rd & 0x1f)  << 7)  | \
+           ((rd & 0x1f) << 7)  | \
            (opcode & 0x7f)
     return inst
   def __encode_i_shift(self, funct7, shamt, rs1, funct3, rd, opcode=0x13):
@@ -172,10 +172,10 @@ class RISCV:
     if format not in ["bin", "oct", "hex"]: raise ValueError(f"invalid file format '{format}', expected from 'bin', 'oct', or 'hex'")
     with open(f"{filename}.{format}", "w") as file:
       for inst in self.__inst:
-         val = int(inst, 16)
-         if format == "hex": file.write(f"{val:08X}\n")
-         elif format == "oct": file.write(f"{val:011o}\n")
-         else: file.write(f"{val:032b}\n")
+        val = int(inst, 16)
+        if format == "hex": file.write(f"{val:08X}\n")
+        elif format == "oct": file.write(f"{val:011o}\n")
+        else: file.write(f"{val:032b}\n")
     if view:
       txt = ""
       for i, inst in enumerate(self.__inst):
