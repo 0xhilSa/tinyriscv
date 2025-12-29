@@ -14,60 +14,70 @@ class RISCV:
   def add(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) + int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x00, rs2, rs1, 0x0, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"add x{rd}, x{rs1}, x{rs1}")
     self.ipc()
   def addi(self, rd:int, rs1:int, imm:int):
     self.regs[rd] = int(self.regs[rs1]) + imm # type: ignore
     inst = self.__encode_i(imm, rs1, 0x0, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"add x{rd}, x{rs1}, {imm}")
     self.ipc()
   def sub(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) - int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x20, rs2, rs1, 0x0, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"sub x{rd}, x{rs1}, x{rs2}")
     self.ipc()
   def mul(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) * int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x01, rs2, rs1, 0x0, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"mul x{rd}, x{rs1}, x{rs1}")
     self.ipc()
   def and_(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) & int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x00, rs2, rs1, 0x7, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"and x{rd}, x{rs1}, x{rs2}")
     self.ipc()
   def andi(self, rd:int, rs1:int, imm:int):
     self.regs[rd] = int(self.regs[rs1]) & imm # type: ignore
     inst = self.__encode_i(imm, rs1, 0x7, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(inst)
     self.ipc()
   def or_(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) | int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x00, rs2, rs1, 0x6, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"or x{rd}, x{rs1}, x{rs2}")
     self.ipc()
   def ori(self, rd:int, rs1:int, imm:int):
     self.regs[rd] = int(self.regs[rs1]) | imm # type: ignore
     inst = self.__encode_i(imm, rs1, 0x6, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"ori x{rd}, x{rs1}, {imm}")
     self.ipc()
   def xor(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) ^ int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x00, rs2, rs1, 0x4, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"xor x{rd}, x{rs1}, x{rs2}")
     self.ipc()
   def xori(self, rd:int, rs1:int, imm:int):
     self.regs[rd] = int(self.regs[rs1] ^ imm) # type: ignore
     inst = self.__encode_i(imm, rs1, 0x4, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"xori x{rd}, x{rs1}, {imm}")
     self.ipc()
@@ -76,6 +86,7 @@ class RISCV:
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
     self.regs[rd] = (val << sh) & 0xffffffff
     inst = self.__encode_r(0x00, rs2, rs1, 0x1, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"sll x{rd}, x{rs1}, x{rs2}")
     self.ipc()
@@ -84,6 +95,7 @@ class RISCV:
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
     self.regs[rd] = (val >> sh) & 0xffffffff
     inst = self.__encode_r(0x00, rs2, rs1, 0x5, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"srl x{rd}, x{rs1}, x{rs2}")
     self.ipc()
@@ -93,6 +105,7 @@ class RISCV:
     if val & 0x80000000: val -= 0x10000000
     self.regs[rd] = (val >> sh) & 0xffffffff
     inst = self.__encode_r(0x20, rs2, rs1, 0x5, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"sra x{rd}, x{rs1}, x{rs2}")
     self.ipc()
@@ -101,6 +114,7 @@ class RISCV:
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
     self.regs[rd] = (val << sh) & 0xffffffff
     inst = self.__encode_i_shift(0x00, sh, rs1, 0x1, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"slli x{rd}, x{rs1}, {sh}")
     self.ipc()
@@ -109,6 +123,7 @@ class RISCV:
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
     self.regs[rd] = (val >> sh) & 0xffffffff
     inst = self.__encode_i_shift(0x00, sh, rs1, 0x5, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"srli x{rd}, x{rs1}, {sh}")
     self.ipc()
@@ -118,6 +133,7 @@ class RISCV:
     if val & 0x80000000: val -= 0x10000000
     self.regs[rd] = (val >> sh) & 0xffffffff
     inst = self.__encode_i_shift(0x20, sh, rs1, 0x5, rd).to_bytes(4, byteorder="big").hex()
+    self.memory[self.pc//4] = int(inst,16)
     self.__inst.append(inst)
     self.__lines.append(f"srai x{rd}, x{rs1}, {sh}")
     self.ipc()
