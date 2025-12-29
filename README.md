@@ -5,7 +5,7 @@
 trying to implement the tiny riscv core in python
 
 ### TODO
-- [ ] Decode instruction and push it into the so called `self.memory`
+- [X] Encode instruction and push it into the so called `self.memory`
 - [X] Implement hex, oct and bin output files
 - [ ] Draw graph for visualization
 - [ ] Generate the assembly full fledged assembly code
