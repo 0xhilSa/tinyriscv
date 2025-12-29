@@ -23,33 +23,29 @@ pip install -e .
 from tinyriscv import RISCV
 
 riscv = RISCV()
-riscv.addi(1, 2, 10)
-riscv.addi(2, 3, 2)
-riscv.sll(3, 1, 2)
-riscv.srl(4, 3, 2)
-riscv.slli(5, 4, 1)
-riscv.srai(6, 5, 1)
-riscv.xor(2, 3, 2)
-riscv.dump(view=True)
+riscv.addi(1, 1, 2)
+riscv.addi(2, 2, 5)
+riscv.add(3, 1, 2)
+riscv.sll(4, 3, 2)
+riscv.xor(5, 4, 3)
+riscv.asm()
 print(riscv.regmap())
 ```
 
 ### Output
 ```bash
-00a10093
-00218113
-002091b3
-0021d233
-00121293
-4012d313
-0021c133
+00208093
+00510113
+002081B3
+00219233
+003242B3
 x0 = 0x0
-x1 = 0xa
-x2 = 0x2a
-x3 = 0x28
-x4 = 0xa
-x5 = 0x14
-x6 = 0xa
+x1 = 0x2
+x2 = 0x5
+x3 = 0x7
+x4 = 0xe0
+x5 = 0xe7
+x6 = 0x0
 x7 = 0x0
 x8 = 0x0
 x9 = 0x0
