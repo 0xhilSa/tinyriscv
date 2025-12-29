@@ -196,8 +196,8 @@ static PyObject *__setitem__(PyObject *self, PyObject *args){
     PyErr_Format(PyExc_ValueError, "Invalid DType: %s", fmt);
     return NULL;
   }
-  if(index <= 0 || index >= length){
-    PyErr_Format(PyExc_IndexError, "Invalid index %n", index);
+  if(index < 0 || index >= length){
+    PyErr_Format(PyExc_IndexError, "Invalid index %zd", index);
     return NULL;
   }
   long val = PyLong_AsLong(value);
