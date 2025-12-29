@@ -19,8 +19,8 @@ class array:
   def sizeof(self): return core.sizeof(self.length, self.dtype.fmt) # in bytes
   def __getitem__(self, index:int|slice):
     if isinstance(index, int):
-      if not 0 <= index < self.length: raise
+      if not 0 <= index < self.length: raise IndexError(f"invalid index {index}")
       return core.getitem(self.buf, index, self.length, self.dtype.fmt)
   def __setitem__(self, index, value):
-    if not 1 <= index < self.length: raise
+    if not 0 <= index < self.length: raise IndexError(f"invalid index {index}")
     core.setitem(self.buf, value, index, self.length, self.dtype.fmt)
