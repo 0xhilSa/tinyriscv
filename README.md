@@ -1,3 +1,5 @@
+<img src="./docs/riscv.svg" alt="riscv.svg">
+
 # TinyRISCV
 
 trying to implement the tiny riscv core in python
