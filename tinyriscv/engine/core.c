@@ -1,5 +1,7 @@
 #include <python3.10/Python.h>
 #include <python3.10/methodobject.h>
+#include <python3.10/pycapsule.h>
+#include <python3.10/pyerrors.h>
 
 size_t getsize(const char *fmt){
   if(fmt == NULL) return 0;
@@ -124,8 +126,9 @@ static PyObject *array(PyObject *self, PyObject *args){
   const char *fmt;
   if(!PyArg_ParseTuple(args, "Os", &pylist, &fmt)) return NULL;
   void *buf;
+  Py_ssize_t length;
   if(PyList_Check(pylist)){
-    Py_ssize_t length = PyList_Size(pylist);
+    length = PyList_Size(pylist);
     buf = __typecasting__(pylist, length, fmt);
   }else{
     PyErr_SetString(PyExc_TypeError, "1D array were expected");
@@ -144,17 +147,13 @@ static PyObject *__sizeof__(PyObject *self, PyObject *args){
 
 static PyObject *__getitem__(PyObject *self, PyObject *args){
   PyObject *pycapsule;
-  Py_ssize_t index;
-  if(!PyArg_ParseTuple(args, "On", &pycapsule, &index)) return NULL;
-  PyObject *item = PyList_GetItem(pycapsule, index);
-  return PyLong_FromLong((long)item);
-}
-
-static PyObject *__setitem__(PyObject *self, PyObject *args){
-  PyObject *pycapsule;
-  long index, value;
+  Py_ssize_t index, length;
   const char *fmt;
-  if(!PyArg_ParseTuple(args, "Onls", &pycapsule, &index, &value, &fmt)) return NULL;
+  if(!PyArg_ParseTuple(args, "Onns", &pycapsule, &index, &length, &fmt)) return NULL;
+  if(!PyCapsule_CheckExact(pycapsule)){
+    PyErr_SetString(PyExc_TypeError, "expected a capsule");
+    return NULL;
+  }
   void *buf = PyCapsule_GetPointer(pycapsule, "array");
   if(!buf) return NULL;
   size_t size = getsize(fmt);
@@ -162,35 +161,76 @@ static PyObject *__setitem__(PyObject *self, PyObject *args){
     PyErr_Format(PyExc_ValueError, "Invalid DType: %s", fmt);
     return NULL;
   }
+  if(index <= 0 || index >= length){
+    PyErr_SetString(PyExc_IndexError, "Index out of range");
+    return NULL;
+  }
+  void *src = (char *)buf + index * size;
+  switch(*fmt){
+    case 'b': return PyLong_FromLong(*(char*)src);
+    case 'B': return PyLong_FromUnsignedLong(*(unsigned char*)src);
+    case 'h': return PyLong_FromLong(*(short*)src);
+    case 'H': return PyLong_FromUnsignedLong(*(unsigned short*)src);
+    case 'i': return PyLong_FromLong(*(int*)src);
+    case 'I': return PyLong_FromUnsignedLong(*(unsigned int*)src);
+    default:
+      PyErr_Format(PyExc_ValueError, "Invalid DType: %s", fmt);
+      return NULL;
+  }
+}
+
+static PyObject *__setitem__(PyObject *self, PyObject *args){
+  PyObject *pycapsule;
+  PyObject *value;
+  Py_ssize_t index, length;
+  const char *fmt;
+  if(!PyArg_ParseTuple(args, "OOnns", &pycapsule, &value, &index, &length, &fmt)) return NULL;
+  if(!PyCapsule_CheckExact(pycapsule)){
+    PyErr_SetString(PyExc_TypeError, "expected a pycapsule");
+    return NULL;
+  }
+  void *buf = PyCapsule_GetPointer(pycapsule, "array");
+  if(!buf) return NULL;
+  size_t size = getsize(fmt);
+  if(size == 0){
+    PyErr_Format(PyExc_ValueError, "Invalid DType: %s", fmt);
+    return NULL;
+  }
+  if(index <= 0 || index >= length){
+    PyErr_Format(PyExc_IndexError, "Invalid index %n", index);
+    return NULL;
+  }
+  long val = PyLong_AsLong(value);
+  if(PyErr_Occurred()) return NULL;
   void *dest = (char *)buf + index * size;
   switch(*fmt){
     case 'b': {
-      char v = (char)value;
+      char v = (char)val;
       memcpy(dest, &v, size);
       break;
     }
     case 'B': {
-      unsigned char v = (unsigned char)value;
+      unsigned char v = (unsigned char)val;
       memcpy(dest, &v, size);
       break;
     }
     case 'h': {
-      short v = (short)value;
+      short v = (short)val;
       memcpy(dest, &v, size);
       break;
     }
     case 'H': {
-      unsigned short v = (unsigned short)value;
+      unsigned short v = (unsigned short)val;
       memcpy(dest, &v, size);
       break;
     }
     case 'i': {
-      int v = (int)value;
+      int v = (int)val;
       memcpy(dest, &v, size);
       break;
     }
     case 'I': {
-      unsigned int v = (unsigned int)value;
+      unsigned int v = (unsigned int)val;
       memcpy(dest, &v, size);
       break;
     }
