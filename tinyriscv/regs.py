@@ -11,6 +11,6 @@ class RegFile:
   def __setitem__(self, index, value):
     if index == 0: raise exceptions.RegisterZeroViolation(f"can't set the value of register x0(zero)")
     if not 1 <= index < len(self.x): raise exceptions.InvalidRegister(f"invalid register call: {index}")
-    self.x[index] = value & 0xfff
+    self.x[index] = value & 0xffffffff
   def __iter__(self): return iter(self.x)
   def __len__(self): return len(self.x)
