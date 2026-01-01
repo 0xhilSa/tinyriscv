@@ -10,77 +10,79 @@ class RISCV:
     self.halted = False # for sim
     self.__lines = []
     self.__inst = []
-  def ipc(self): self.pc += 4
+  @property
+  def inst(self): return self.__inst
+  def __ipc(self): self.pc += 4
   def add(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) + int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x00, rs2, rs1, 0x0, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"add x{rd}, x{rs1}, x{rs1}")
-    self.ipc()
+    self.__ipc()
   def addi(self, rd:int, rs1:int, imm:int):
     self.regs[rd] = int(self.regs[rs1]) + imm # type: ignore
     inst = self.__encode_i(imm, rs1, 0x0, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
-    self.__lines.append(f"add x{rd}, x{rs1}, {imm}")
-    self.ipc()
+    self.__lines.append(f"addi x{rd}, x{rs1}, {hex(imm)}")
+    self.__ipc()
   def sub(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) - int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x20, rs2, rs1, 0x0, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"sub x{rd}, x{rs1}, x{rs2}")
-    self.ipc()
+    self.__ipc()
   def mul(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) * int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x01, rs2, rs1, 0x0, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"mul x{rd}, x{rs1}, x{rs1}")
-    self.ipc()
+    self.__ipc()
   def and_(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) & int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x00, rs2, rs1, 0x7, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"and x{rd}, x{rs1}, x{rs2}")
-    self.ipc()
+    self.__ipc()
   def andi(self, rd:int, rs1:int, imm:int):
     self.regs[rd] = int(self.regs[rs1]) & imm # type: ignore
     inst = self.__encode_i(imm, rs1, 0x7, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
-    self.__lines.append(inst)
-    self.ipc()
+    self.__lines.append(f"andi x{rd}, x{rs1}, {imm}")
+    self.__ipc()
   def or_(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) | int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x00, rs2, rs1, 0x6, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"or x{rd}, x{rs1}, x{rs2}")
-    self.ipc()
+    self.__ipc()
   def ori(self, rd:int, rs1:int, imm:int):
     self.regs[rd] = int(self.regs[rs1]) | imm # type: ignore
     inst = self.__encode_i(imm, rs1, 0x6, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"ori x{rd}, x{rs1}, {imm}")
-    self.ipc()
+    self.__ipc()
   def xor(self, rd:int, rs1:int, rs2:int):
     self.regs[rd] = int(self.regs[rs1]) ^ int(self.regs[rs2]) # type: ignore
     inst = self.__encode_r(0x00, rs2, rs1, 0x4, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"xor x{rd}, x{rs1}, x{rs2}")
-    self.ipc()
+    self.__ipc()
   def xori(self, rd:int, rs1:int, imm:int):
     self.regs[rd] = int(self.regs[rs1] ^ imm) # type: ignore
     inst = self.__encode_i(imm, rs1, 0x4, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
-    self.__lines.append(f"xori x{rd}, x{rs1}, {imm}")
-    self.ipc()
+    self.__lines.append(f"xori x{rd}, x{rs1}, {hex(imm)}")
+    self.__ipc()
   def sll(self, rd:int, rs1:int, rs2:int):
     sh = int(self.regs[rs2]) & 0x1f # type: ignore
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
@@ -89,7 +91,7 @@ class RISCV:
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"sll x{rd}, x{rs1}, x{rs2}")
-    self.ipc()
+    self.__ipc()
   def srl(self, rd:int, rs1:int, rs2:int):
     sh = int(self.regs[rs2]) & 0x1f # type: ignore
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
@@ -98,17 +100,17 @@ class RISCV:
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"srl x{rd}, x{rs1}, x{rs2}")
-    self.ipc()
+    self.__ipc()
   def sra(self, rd:int, rs1:int, rs2:int):
     sh = int(self.regs[rs2]) & 0x1f # type: ignore
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
-    if val & 0x80000000: val -= 0x10000000
+    if val & 0x80000000: val -= 0x100000000
     self.regs[rd] = (val >> sh) & 0xffffffff
     inst = self.__encode_r(0x20, rs2, rs1, 0x5, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
     self.__lines.append(f"sra x{rd}, x{rs1}, x{rs2}")
-    self.ipc()
+    self.__ipc()
   def slli(self, rd:int, rs1:int, shamt:int):
     sh = shamt & 0x1f
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
@@ -116,8 +118,8 @@ class RISCV:
     inst = self.__encode_i_shift(0x00, sh, rs1, 0x1, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
-    self.__lines.append(f"slli x{rd}, x{rs1}, {sh}")
-    self.ipc()
+    self.__lines.append(f"slli x{rd}, x{rs1}, {hex(sh)}")
+    self.__ipc()
   def srli(self, rd:int, rs1, shamt:int):
     sh = shamt & 0x1f
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
@@ -125,18 +127,62 @@ class RISCV:
     inst = self.__encode_i_shift(0x00, sh, rs1, 0x5, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
-    self.__lines.append(f"srli x{rd}, x{rs1}, {sh}")
-    self.ipc()
+    self.__lines.append(f"srli x{rd}, x{rs1}, {hex(sh)}")
+    self.__ipc()
   def srai(self, rd:int, rs1:int, shamt:int):
     sh = shamt & 0x1f
     val = int(self.regs[rs1]) & 0xffffffff # type: ignore
-    if val & 0x80000000: val -= 0x10000000
+    if val & 0x80000000: val -= 0x100000000
     self.regs[rd] = (val >> sh) & 0xffffffff
     inst = self.__encode_i_shift(0x20, sh, rs1, 0x5, rd).to_bytes(4, byteorder="big").hex()
     self.__store_inst(int(inst,16))
     self.__inst.append(inst)
-    self.__lines.append(f"srai x{rd}, x{rs1}, {sh}")
-    self.ipc()
+    self.__lines.append(f"srai x{rd}, x{rs1}, {hex(sh)}")
+    self.__ipc()
+  def slt(self, rd:int, rs1:int, rs2:int):
+    v1 = int(self.regs[rs1]) & 0xffffffff # type: ignore
+    v2 = int(self.regs[rs2]) & 0xffffffff # type: ignore
+    if v1 & 0x80000000: v1 -= 0x100000000
+    if v2 & 0x80000000: v2 -= 0x100000000
+    self.regs[rd] = 1 if v1 < v2 else 0
+    inst = self.__encode_r(0x00, rs2, rs1, 0x2, rd)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"slt x{rd}, x{rs1}, x{rs2}")
+    self.__ipc()
+  def slti(self, rd:int, rs1:int, imm:int):
+    imm &= 0xfff
+    if imm & 0x800: imm -= 0x1000
+    self.regs[rd] = 1 if int(self.regs[rs1]) < imm else 0 # type: ignore
+    inst = self.__encode_i(imm, rs1, 0x2, rd)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"slti x{rd}, {hex(imm)}")
+    self.__ipc()
+  def sltiu(self, rd:int, rs1:int, imm:int):
+    imm &= 0xfff
+    self.regs[rd] = 1 if (int(self.regs[rs1]) & 0xffffffff) < imm else 0 # type: ignore
+    inst = self.__encode_i(imm, rs1, 0x3, rd)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"sltiu x{rd}, x{rs1}, {hex(imm)}")
+    self.__ipc()
+  def lui(self, rd:int, imm:int):
+    imm &= 0xfffff
+    self.regs[rd] = (imm << 12) # type: ignore
+    inst = self.__encode_u(imm, rd, 0x37)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"lui x{rd}, {hex(imm)}")
+    self.__ipc()
+  def auipc(self, rd:int, imm:int):
+    imm &= 0xfffff
+    self.regs[rd] = self.pc + (imm << 12) # type: ignore
+    inst = self.__encode_u(imm, rd, 0x17)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"auipc x{rd}, {hex(imm)}")
+    self.__ipc()
   def regmap(self):
     txt = ""
     for index, value in enumerate(self.regs):
@@ -181,6 +227,10 @@ class RISCV:
         ((funct3 & 0x07) << 12) | \
         ((rd & 0x1f) << 7) | \
         (opcode & 0x7f)
+    return inst
+  def __encode_u(self, imm: int, rd: int, opcode: int):
+    imm &= 0xfffff
+    inst = ((imm & 0xfffff) << 12) | ((rd & 0x1f) << 7) | (opcode & 0x7f)
     return inst
   def __store_inst(self, inst:int):
     addr = self.pc
