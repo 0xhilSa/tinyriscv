@@ -1,4 +1,4 @@
-<img src="./docs/riscv.svg" alt="riscv.svg">
+<img src="./docs/tinyriscv.png" alt="tinyriscv.png">
 
 # TinyRISCV
 
