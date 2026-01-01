@@ -9,6 +9,7 @@ trying to implement the tiny riscv core in python
 - [X] Implement hex, oct and bin output files
 - [ ] Draw graph for visualization
 - [ ] Generate the assembly full fledged assembly code
+- [ ] Include all the I, R, J type instruction
 
 ### Install from the source
 ```bash
