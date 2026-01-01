@@ -183,6 +183,56 @@ class RISCV:
     self.__inst.append(f"{inst:08X}")
     self.__lines.append(f"auipc x{rd}, {hex(imm)}")
     self.__ipc()
+  def beq(self, rs1:int, rs2:int, offset:int):
+    inst = self.__encode_b(offset, rs1, rs2, 0x0)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"beq x{rs1}, x{rs2}, {hex(offset)}")
+    if int(self.regs[rs1]) == int(self.regs[rs2]): self.pc += offset # type: ignore
+    else: self.__ipc()
+  def bne(self, rs1: int, rs2: int, offset: int):
+    inst = self.__encode_b(offset, rs1, rs2, 0x1)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"bne x{rs1}, x{rs2}, {hex(offset)}")
+    if int(self.regs[rs1]) != int(self.regs[rs2]): self.pc += offset # type: ignore
+    else: self.__ipc()
+  def blt(self, rs1: int, rs2: int, offset: int):
+    v1 = self._signed32(int(self.regs[rs1]))  # type: ignore
+    v2 = self._signed32(int(self.regs[rs2]))  # type: ignore
+    inst = self.__encode_b(offset, rs1, rs2, 0x4)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"blt x{rs1}, x{rs2}, {hex(offset)}")
+    if v1 < v2: self.pc += offset
+    else: self.__ipc()
+  def bge(self, rs1: int, rs2: int, offset: int):
+    v1 = self._signed32(int(self.regs[rs1]))  # type: ignore
+    v2 = self._signed32(int(self.regs[rs2]))  # type: ignore
+    inst = self.__encode_b(offset, rs1, rs2, 0x5)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"bge x{rs1}, x{rs2}, {hex(offset)}")
+    if v1 >= v2: self.pc += offset
+    else: self.__ipc()
+  def bltu(self, rs1: int, rs2: int, offset: int):
+    v1 = int(self.regs[rs1]) & 0xffffffff  # type: ignore
+    v2 = int(self.regs[rs2]) & 0xffffffff  # type: ignore
+    inst = self.__encode_b(offset, rs1, rs2, 0x6)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"bltu x{rs1}, x{rs2}, {hex(offset)}")
+    if v1 < v2: self.pc += offset
+    else: self.__ipc()
+  def bgeu(self, rs1: int, rs2: int, offset: int):
+    v1 = int(self.regs[rs1]) & 0xffffffff  # type: ignore
+    v2 = int(self.regs[rs2]) & 0xffffffff  # type: ignore
+    inst = self.__encode_b(offset, rs1, rs2, 0x7)
+    self.__store_inst(inst)
+    self.__inst.append(f"{inst:08X}")
+    self.__lines.append(f"bgeu x{rs1}, x{rs2}, {hex(offset)}")
+    if v1 >= v2: self.pc += offset
+    else: self.__ipc()
   def regmap(self):
     txt = ""
     for index, value in enumerate(self.regs):
@@ -231,6 +281,19 @@ class RISCV:
   def __encode_u(self, imm: int, rd: int, opcode: int):
     imm &= 0xfffff
     inst = ((imm & 0xfffff) << 12) | ((rd & 0x1f) << 7) | (opcode & 0x7f)
+    return inst
+  def __encode_b(self, imm:int, rs1:int, rs2:int, funct3:int, opcode:int=0x63):
+    if imm & 0x1: raise ValueError("Branch offset must be 2-byte aligned")
+    imm >>= 1
+    imm &= 0xfff
+    inst = ((imm >> 11) & 0x1) << 31 | \
+        ((imm >> 5) & 0x3f) << 25 | \
+        (rs2 & 0x1f) << 20 | \
+        (rs1 & 0x1f) << 15 | \
+        (funct3 & 0x7) << 12 | \
+        ((imm >> 1) & 0xf) << 8 | \
+        ((imm >> 10) & 0x1) << 7 | \
+        opcode
     return inst
   def __store_inst(self, inst:int):
     addr = self.pc
