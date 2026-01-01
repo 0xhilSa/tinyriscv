@@ -1,6 +1,8 @@
 <img src="./docs/tinyriscv.png" alt="tinyriscv.png">
 <p align=center>trying to implement the tiny riscv core in python</p>
 
+---
+
 ### TODO
 - [X] Encode instruction and push it into the so called `self.memory`
 - [X] Implement hex, oct and bin output files
